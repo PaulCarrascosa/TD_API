@@ -1,0 +1,44 @@
+# ─── docker-compose.yml ─────────────────────────────────────────────────
+# Lance les deux APIs en même temps avec une seule commande :
+#   docker-compose up -d
+#
+# Les tokens sont lus depuis le fichier .env à la racine du projet.
+# Ne jamais écrire les secrets directement ici — utiliser ${VAR:-defaut}.
+
+services:
+
+  # ── API REST Flask (exercice 1) ────────────────────────────────────────
+  api-rest:
+    build:
+      context: ../exercice1_rest   # dossier contenant le Dockerfile et app.py
+      dockerfile: Dockerfile
+    container_name: eche834-api-rest
+    ports:
+      - "5000:5000"                # hôte:conteneur
+    environment:
+      - API_TOKEN=${API_TOKEN:-mon_token_secret_123}
+      - FLASK_ENV=development
+    volumes:
+      - ../exercice1_rest:/app     # hot reload : les modifications locales sont reflétées
+    restart: unless-stopped
+
+  # ── API GraphQL FastAPI (exercice 2) ──────────────────────────────────
+  api-graphql:
+    build:
+      context: ../exercice2_graphql
+      dockerfile: Dockerfile
+    container_name: eche834-api-graphql
+    ports:
+      - "8000:8000"
+    environment:
+      - API_TOKEN=${API_TOKEN:-mon_token_secret_123}
+    volumes:
+      - ../exercice2_graphql:/app
+    restart: unless-stopped
+    depends_on:
+      - api-rest               # démarre uniquement après l'API REST
+
+# Les deux services partagent le même réseau (créé automatiquement).
+# Ils peuvent se contacter via leurs noms de service :
+#   http://api-rest:5000      (depuis api-graphql)
+#   http://api-graphql:8000   (depuis api-rest)

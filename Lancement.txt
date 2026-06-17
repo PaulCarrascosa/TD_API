@@ -1,0 +1,33 @@
+API REST (exercice 1) — port 5000
+
+cd c:\Users\paulc\Desktop\Cours_EID\API\TD\exercice1_rest
+python app.py
+
+Test rapide :
+
+Invoke-RestMethod -Uri "http://localhost:5000/evenements" `
+  -Headers @{ "Authorization" = "Bearer mon_token_secret_123" }
+
+API GraphQL (exercice 2) — port 8000
+
+cd c:\Users\paulc\Desktop\Cours_EID\API\TD\exercice2_graphql
+python app.py
+
+Test rapide :
+
+$r = Invoke-RestMethod -Uri "http://localhost:8000/graphql" `
+  -Method POST `
+  -Headers @{ "Authorization" = "Bearer mon_token_secret_123" } `
+  -ContentType "application/json" `
+  -Body '{"query": "{ evenements { nom lieu } }"}'
+$r.data.evenements | Format-Table
+
+Tests pytest
+
+# Exercice 1
+cd c:\Users\paulc\Desktop\Cours_EID\API\TD\exercice1_rest
+pytest tests/ -v
+
+# Exercice 2
+cd c:\Users\paulc\Desktop\Cours_EID\API\TD\exercice2_graphql
+pytest tests/ -v
