@@ -1,0 +1,38 @@
+ECHE834 — TD2 | Exercice 1 — Section 3.4 : Tableau comparatif Flask vs FastAPI
+===============================================================================
+
+Critère observé                        | Flask                                    | FastAPI
+---------------------------------------|------------------------------------------|------------------------------------------
+Lignes pour valider un contact         | ~10 lignes : fonction valider_contact()  | ~5 lignes : classe ContactInput avec
+                                       | avec boucle sur les champs requis,       | EmailStr, types Python et valeurs par
+                                       | vérification du '@', test du nom vide    | défaut — Pydantic fait le reste
+---------------------------------------|------------------------------------------|------------------------------------------
+Erreur retournée si email mal formé    | 400 Bad Request                          | 422 Unprocessable Entity
+(test : "email": "pas-un-email")       | {                                        | {
+                                       |   "erreur": "Requête invalide",          |   "detail": [{
+                                       |   "detail": "L'email doit                |     "loc": ["body", "email"],
+                                       |              contenir '@'"               |     "msg": "value is not a valid
+                                       | }                                        |              email address",
+                                       |                                          |     "type": "value_error.email"
+                                       |                                          |   }]
+                                       |                                          | }
+---------------------------------------|------------------------------------------|------------------------------------------
+Documentation générée automatiquement  | Aucune — il faut écrire soi-même        | Swagger UI à http://localhost:8000/docs
+                                       | la documentation (README, collection     | et ReDoc à /redoc, générés
+                                       | Postman, etc.)                           | automatiquement depuis les modèles
+---------------------------------------|------------------------------------------|------------------------------------------
+Temps de mise en place ressenti        | Plus long : chaque règle de validation   | Plus rapide : Pydantic gère les types,
+                                       | s'écrit à la main ; les messages         | le format email et les valeurs par
+                                       | d'erreur sont construits manuellement    | défaut ; seule l'auth est manuelle
+                                       | via abort()                              | via Depends()
+
+-----------------------------------------------------------------------
+Conclusion
+-----------------------------------------------------------------------
+Flask offre un contrôle explicite sur le format exact des réponses
+d'erreur (utile pour respecter une convention d'équipe existante), mais
+FastAPI réduit significativement le code de validation grâce à Pydantic
+et génère la documentation interactive sans travail supplémentaire.
+
+Pour un nouveau projet sans contrainte de legacy, FastAPI est plus
+productif dès qu'on a besoin de validation stricte ou de documentation.
