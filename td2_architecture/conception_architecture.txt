@@ -1,0 +1,62 @@
+ECHE834 — TD2 | Exercice 2 — Conception de l'architecture RESTful (médiathèque)
+===============================================================================
+
+ÉTAPE 1 — Modélisation des ressources (section 4.2)
+----------------------------------------------------
+
+Question 1 : Quelles sont les ressources principales ? Combien y en a-t-il ?
+
+  Deux ressources principales :
+  - "salles"       : les salles physiques de la médiathèque (nom, capacité, équipement)
+  - "reservations" : les créneaux réservés par les usagers (date, heures, usager)
+
+
+Question 2 : Une réservation est-elle une ressource indépendante ou une
+             sous-ressource d'une salle ? Justifiez.
+
+  Une réservation est une sous-ressource d'une salle pour la création et
+  la consultation : une réservation ne peut pas exister sans salle parente,
+  et le lien salle/créneau est central pour le contrôle de chevauchement.
+  En revanche, elle est accessible directement via /reservations/{id} pour
+  l'annulation, car une fois l'identifiant connu on n'a pas besoin de passer
+  par la salle. Cela évite aussi un troisième niveau d'imbrication
+  (/salles/{id}/reservations/{id}), déconseillé par les bonnes pratiques REST.
+
+
+Question 3 : Quelles URL pour les trois opérations principales ?
+
+  - Lister toutes les salles               → GET  /salles
+  - Lister les réservations d'une salle    → GET  /salles/{salle_id}/reservations
+  - Créer une réservation                  → POST /salles/{salle_id}/reservations
+
+
+Question 4 : Méthode HTTP et code de statut pour annuler une réservation ?
+
+  Méthode  : DELETE
+  URL      : /reservations/{reservation_id}
+  Code     : 204 No Content (la suppression a réussi, aucun corps à renvoyer)
+
+
+ÉTAPE 2 — Choix du framework (section 4.3)
+------------------------------------------
+
+Framework retenu : FastAPI
+
+Justification : ce projet exige une validation stricte des données saisies
+(format des dates, cohérence des heures, détection de chevauchement) et une
+documentation Swagger automatique utile aux développeurs qui intégreront
+l'API — deux points forts de FastAPI par rapport à Flask.
+
+
+RÉCAPITULATIF DES CODES DE STATUT UTILISÉS (section 4.5)
+----------------------------------------------------------
+
+Situation                                    | Code retourné
+---------------------------------------------|---------------
+Réservation créée avec succès                | 201 Created
+Champ obligatoire manquant ou mal formé      | 422 Unprocessable Entity (Pydantic)
+Salle inexistante référencée                 | 404 Not Found
+Créneau qui chevauche une réservation        | 409 Conflict
+Suppression d'une réservation réussie        | 204 No Content
+Token absent                                 | 401 Unauthorized
+Token invalide                               | 403 Forbidden
